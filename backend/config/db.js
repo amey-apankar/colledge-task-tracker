@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
+let cachedConnection = null;
+
 const connectDB = async () => {
+  if (cachedConnection && mongoose.connection.readyState === 1) {
+    return cachedConnection;
+  }
+
   try {
     let mongoUri = process.env.MONGO_URI;
 
@@ -12,11 +18,12 @@ const connectDB = async () => {
       mongoUri = mongoServer.getUri();
     }
 
-    const conn = await mongoose.connect(mongoUri);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    cachedConnection = await mongoose.connect(mongoUri);
+    console.log(`MongoDB Connected: ${mongoose.connection.host}`);
+    return cachedConnection;
   } catch (error) {
     console.error(`Error: ${error.message}`);
-    process.exit(1);
+    throw error;
   }
 };
 

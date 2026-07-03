@@ -10,8 +10,6 @@ dotenv.config();
 
 const connectDB = require('./config/db');
 
-connectDB();
-
 const app = express();
 
 const corsOptions = {
@@ -29,6 +27,16 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+
+// Ensure DB is connected before every request (required for Vercel serverless)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    res.status(503).json({ message: 'Database connection failed', error: err.message });
+  }
+});
 
 app.use('/api/tasks', require('./routes/taskRoutes'));
 
