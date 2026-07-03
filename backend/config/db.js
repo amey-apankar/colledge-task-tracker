@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const connectDB = async () => {
   try {
@@ -7,6 +6,8 @@ const connectDB = async () => {
 
     if (!mongoUri) {
       console.log('No MONGO_URI specified. Starting in-memory MongoDB database...');
+      // Lazy-load so production (where devDependencies are absent) never crashes
+      const { MongoMemoryServer } = require('mongodb-memory-server');
       const mongoServer = await MongoMemoryServer.create();
       mongoUri = mongoServer.getUri();
     }
