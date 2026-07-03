@@ -14,7 +14,20 @@ connectDB();
 
 const app = express();
 
-app.use(cors());
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigin = process.env.FRONTEND_URL;
+    // Allow requests with no origin (like mobile apps or curl) or matching front-end URL, or localhost in development
+    if (!origin || !allowedOrigin || origin === allowedOrigin || origin.startsWith('http://localhost:')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use('/api/tasks', require('./routes/taskRoutes'));
